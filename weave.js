@@ -15,11 +15,24 @@
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
+// Two palettes, because one cannot serve both backgrounds. The dark set is bright enough to
+// glow on near-black; those same hues over white, dimmed by the shading term and blended at
+// low opacity, turn to grey mud. The light set is deeper and more saturated so it reads AS
+// colour against paper.
 const PALETTE = {
-  a: new THREE.Color("#f0a742"), // amber
-  b: new THREE.Color("#e0725f"), // coral
-  c: new THREE.Color("#a06bff"), // violet
+  dark: {
+    a: new THREE.Color("#f0a742"), // amber
+    b: new THREE.Color("#e0725f"), // coral
+    c: new THREE.Color("#a06bff"), // violet
+  },
+  light: {
+    a: new THREE.Color("#b8690a"),
+    b: new THREE.Color("#c0503c"),
+    c: new THREE.Color("#6a37cc"),
+  },
 };
+
+const isLightTheme = () => document.documentElement.dataset.theme === "light";
 
 /**
  * One thread as a smooth curve. `axis` 0 = warp (runs along x), 1 = weft (runs along z).
@@ -93,6 +106,7 @@ const FRAG = /* glsl */ `
   uniform vec3 uB;
   uniform vec3 uC;
   uniform float uOpacity;
+  uniform float uLight;
   varying float vShade;
   varying float vHeight;
 
@@ -101,8 +115,13 @@ const FRAG = /* glsl */ `
     vec3 col = vShade < 0.5
       ? mix(uA, uB, vShade * 2.0)
       : mix(uB, uC, (vShade - 0.5) * 2.0);
-    // Threads riding over a crossing catch a little more light than those dipping under.
-    col *= 0.72 + clamp(vHeight * 6.0, -0.25, 0.42);
+    // Threads riding over a crossing catch more light than those dipping under. On a dark
+    // background that means multiplying DOWN from 1; on a light one the same move only makes
+    // the colour muddy, so the range narrows and centres near 1.
+    float base = mix(0.72, 0.94, uLight);
+    float lo = mix(-0.25, -0.10, uLight);
+    float hi = mix(0.42, 0.12, uLight);
+    col *= base + clamp(vHeight * 6.0, lo, hi);
     gl_FragColor = vec4(col, uOpacity);
   }
 `;
@@ -175,12 +194,29 @@ export function mountWeave(canvas, options = {}) {
       uTime: { value: 0 },
       uSpan: { value: span },
       uRipple: { value: reduced ? 0 : calm ? ripple * 0.45 : ripple },
-      uA: { value: PALETTE.a },
-      uB: { value: PALETTE.b },
-      uC: { value: PALETTE.c },
+      uA: { value: PALETTE.dark.a.clone() },
+      uB: { value: PALETTE.dark.b.clone() },
+      uC: { value: PALETTE.dark.c.clone() },
       uOpacity: { value: opacity },
+      uLight: { value: 0 },
     },
   });
+
+  // Theme is a runtime toggle, not a page reload, so the palette has to follow it.
+  const applyTheme = () => {
+    const light = isLightTheme();
+    const p = light ? PALETTE.light : PALETTE.dark;
+    material.uniforms.uA.value.copy(p.a);
+    material.uniforms.uB.value.copy(p.b);
+    material.uniforms.uC.value.copy(p.c);
+    material.uniforms.uLight.value = light ? 1 : 0;
+  };
+  applyTheme();
+  const themeObserver = new MutationObserver(() => {
+    applyTheme();
+    if (reduced) renderer.render(scene, camera); // static frame must repaint on its own
+  });
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   const cloth = new THREE.Mesh(geometry, material);
   cloth.rotation.x = -0.12;
@@ -264,6 +300,7 @@ export function mountWeave(canvas, options = {}) {
 
   return function dispose() {
     stop();
+    themeObserver.disconnect();
     io.disconnect();
     window.removeEventListener("resize", onResize);
     window.removeEventListener("pointermove", onPointer);

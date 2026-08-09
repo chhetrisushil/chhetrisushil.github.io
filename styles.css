@@ -176,6 +176,9 @@ code {
   mask-composite: intersect;
 }
 #weave[data-on] { opacity: 0.55; }
+/* Deeper light-mode threads can carry more presence without shouting; at 0.55 they wash out
+   against white, which was half of why light mode looked wrong. */
+:root[data-theme="light"] #weave[data-on] { opacity: 0.72; }
 @media (max-width: 900px) { #weave { display: none; } }
 
 .eyebrow {
