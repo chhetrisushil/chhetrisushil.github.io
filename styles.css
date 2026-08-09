@@ -45,19 +45,24 @@
   z-index: -3;
   pointer-events: none;
   overflow: hidden;
-  background:
-    radial-gradient(60% 45% at 18% 8%, rgba(240, 167, 66, 0.09), transparent 70%),
-    radial-gradient(50% 40% at 88% 22%, rgba(160, 107, 255, 0.09), transparent 70%),
-    radial-gradient(45% 35% at 60% 92%, rgba(224, 114, 95, 0.06), transparent 70%);
+  background: transparent;
 }
+.bg > * { position: absolute; will-change: transform; }
+
+/* FAR — soft colour, barely moves. Establishes the mood and the sense of distance. */
+.bg-orbs {
+  inset: -22% -10%;
+  background:
+    radial-gradient(38% 30% at 18% 12%, rgba(240, 167, 66, 0.16), transparent 70%),
+    radial-gradient(34% 28% at 84% 20%, rgba(160, 107, 255, 0.16), transparent 70%),
+    radial-gradient(30% 26% at 62% 88%, rgba(224, 114, 95, 0.11), transparent 70%),
+    radial-gradient(26% 22% at 8% 72%, rgba(160, 107, 255, 0.09), transparent 70%);
+  filter: blur(6px);
+}
+
+/* MID — the weave. The loom motif, at a whisper. */
 .bg-weave {
-  position: absolute;
-  /* Oversized so the drift never exposes an edge. */
-  inset: -14% -6%;
-  opacity: 1;
-  will-change: transform;
-  /* Two spacings, so the drift is legible without the grid becoming a subject in its own
-     right: a coarse weave plus a fainter one at half the pitch. */
+  inset: -18% -8%;
   background-image:
     repeating-linear-gradient(90deg, rgba(176, 190, 216, 0.11) 0 1px, transparent 1px 72px),
     repeating-linear-gradient(0deg, rgba(176, 190, 216, 0.095) 0 1px, transparent 1px 72px),
@@ -66,18 +71,47 @@
   -webkit-mask-image: radial-gradient(88% 78% at 50% 34%, #000 30%, transparent 88%);
   mask-image: radial-gradient(88% 78% at 50% 34%, #000 30%, transparent 88%);
 }
-:root[data-theme="light"] .bg {
+
+/* NEAR — sparse motes, the fastest layer. Two tiled fields at different pitches so the
+   spacing never resolves into an obvious repeat. */
+.bg-motes {
+  inset: -30% -10%;
+  background-image:
+    radial-gradient(circle at 12% 22%, rgba(240, 167, 66, 0.5) 0 1.4px, transparent 1.6px),
+    radial-gradient(circle at 68% 8%, rgba(160, 107, 255, 0.45) 0 1.6px, transparent 1.8px),
+    radial-gradient(circle at 40% 74%, rgba(224, 114, 95, 0.4) 0 1.3px, transparent 1.5px),
+    radial-gradient(circle at 88% 58%, rgba(231, 236, 243, 0.28) 0 1.2px, transparent 1.4px),
+    radial-gradient(circle at 26% 52%, rgba(231, 236, 243, 0.2) 0 1px, transparent 1.2px);
+  background-size: 460px 420px, 520px 470px, 380px 350px, 610px 540px, 300px 280px;
+  -webkit-mask-image: radial-gradient(92% 82% at 50% 38%, #000 20%, transparent 92%);
+  mask-image: radial-gradient(92% 82% at 50% 38%, #000 20%, transparent 92%);
+}
+
+:root[data-theme="light"] .bg-orbs {
   background:
-    radial-gradient(60% 45% at 18% 8%, rgba(178, 106, 0, 0.07), transparent 70%),
-    radial-gradient(50% 40% at 88% 22%, rgba(111, 63, 214, 0.06), transparent 70%);
+    radial-gradient(38% 30% at 18% 12%, rgba(178, 106, 0, 0.11), transparent 70%),
+    radial-gradient(34% 28% at 84% 20%, rgba(111, 63, 214, 0.10), transparent 70%),
+    radial-gradient(30% 26% at 62% 88%, rgba(192, 80, 60, 0.07), transparent 70%);
 }
 :root[data-theme="light"] .bg-weave {
   background-image:
-    repeating-linear-gradient(90deg, rgba(40, 55, 80, 0.10) 0 1px, transparent 1px 72px),
-    repeating-linear-gradient(0deg, rgba(40, 55, 80, 0.085) 0 1px, transparent 1px 72px),
-    repeating-linear-gradient(90deg, rgba(40, 55, 80, 0.045) 0 1px, transparent 1px 36px),
-    repeating-linear-gradient(0deg, rgba(40, 55, 80, 0.04) 0 1px, transparent 1px 36px);
+    repeating-linear-gradient(90deg, rgba(40, 55, 80, 0.09) 0 1px, transparent 1px 72px),
+    repeating-linear-gradient(0deg, rgba(40, 55, 80, 0.075) 0 1px, transparent 1px 72px),
+    repeating-linear-gradient(90deg, rgba(40, 55, 80, 0.04) 0 1px, transparent 1px 36px),
+    repeating-linear-gradient(0deg, rgba(40, 55, 80, 0.035) 0 1px, transparent 1px 36px);
 }
+:root[data-theme="light"] .bg-motes {
+  background-image:
+    radial-gradient(circle at 12% 22%, rgba(178, 106, 0, 0.42) 0 1.4px, transparent 1.6px),
+    radial-gradient(circle at 68% 8%, rgba(111, 63, 214, 0.38) 0 1.6px, transparent 1.8px),
+    radial-gradient(circle at 40% 74%, rgba(192, 80, 60, 0.32) 0 1.3px, transparent 1.5px),
+    radial-gradient(circle at 88% 58%, rgba(40, 55, 80, 0.22) 0 1.2px, transparent 1.4px),
+    radial-gradient(circle at 26% 52%, rgba(40, 55, 80, 0.16) 0 1px, transparent 1.2px);
+}
+
+/* The hero drifts and fades as it leaves — the reference's signature move. Transition only
+   on opacity: transform is driven per-frame and must not lag behind the scroll. */
+.hero .shell { will-change: transform, opacity; }
 
 *, *::before, *::after { box-sizing: border-box; }
 

@@ -58,7 +58,13 @@
   </head>
 
   <body>
-    <div class="bg" aria-hidden="true"><div class="bg-weave"></div></div>
+    <!-- Three depth layers + a drifting hero. Each moves at a different rate; that difference
+         IS the parallax — a single layer, however pretty, only ever reads as a texture. -->
+    <div class="bg" aria-hidden="true">
+      <div class="bg-orbs"></div>
+      <div class="bg-weave"></div>
+      <div class="bg-motes"></div>
+    </div>
 
     <a class="skip" href="#main">Skip to content</a>
 
@@ -263,25 +269,36 @@
     </script>
 
     <script>
-      // Page-wide parallax. The layer is position:fixed, so translating it against the scroll
-      // is what produces depth — the hero canvas alone could not show this because it scrolls
-      // away. rAF-coalesced: scroll fires far more often than the screen repaints.
+      // Layered parallax. One scroll handler drives every layer, rAF-coalesced, because scroll
+      // fires far more often than the screen repaints and four separate listeners would all be
+      // fighting for the same frame.
+      //
+      // Rates are deliberately spread: the far orbs barely move, the weave drifts, the motes
+      // overtake the page slightly. Depth comes from the DIFFERENCE between them, not from any
+      // one layer moving a lot.
       (() => {
-        const layer = document.querySelector(".bg-weave");
-        if (!layer) return;
-        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        const orbs = document.querySelector(".bg-orbs");
+        const weave = document.querySelector(".bg-weave");
+        const motes = document.querySelector(".bg-motes");
+        const hero = document.querySelector(".hero .shell");
+        if (!orbs || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
         let queued = false;
         const apply = () => {
           queued = false;
-          // 6% of scroll distance: enough to notice against fixed content, far too little to
-          // read as the page fighting you.
-          layer.style.transform = `translate3d(0, ${window.scrollY * 0.06}px, 0)`;
+          const y = window.scrollY;
+          orbs.style.transform = `translate3d(0, ${y * 0.02}px, 0)`;
+          weave.style.transform = `translate3d(0, ${y * 0.07}px, 0)`;
+          motes.style.transform = `translate3d(0, ${y * 0.16}px, 0)`;
+          if (hero) {
+            // The reference's signature move: the hero sinks and fades as it leaves, rather
+            // than simply scrolling away. Clamped so it never fully disappears mid-read.
+            const p = Math.min(y / (window.innerHeight * 0.9), 1);
+            hero.style.transform = `translate3d(0, ${p * 46}px, 0)`;
+            hero.style.opacity = String(1 - p * 0.72);
+          }
         };
-        addEventListener(
-          "scroll",
-          () => { if (!queued) { queued = true; requestAnimationFrame(apply); } },
-          { passive: true }
-        );
+        addEventListener("scroll", () => { if (!queued) { queued = true; requestAnimationFrame(apply); } }, { passive: true });
         apply();
       })();
     </script>
