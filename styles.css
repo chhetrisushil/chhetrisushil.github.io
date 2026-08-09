@@ -76,7 +76,10 @@
    Kept at the edge of perception on purpose: a background figure you NOTICE is a distraction,
    one you half-see is atmosphere. Heavy blur, very low opacity, and never over the text
    column — they live in the outer thirds. */
-.bg-wraiths { inset: -24% -8%; }
+/* Vertical bleed only. A negative HORIZONTAL inset makes `right: 3%` resolve against a box
+   wider than the viewport, which pushed the right-hand figure two-thirds off-screen. The drift
+   is vertical, so there is nothing for horizontal bleed to hide. */
+.bg-wraiths { inset: -24% 0; }
 .wr {
   position: absolute;
   width: clamp(120px, 12vw, 200px);
@@ -93,7 +96,7 @@
    fill with a faint luminous edge gives the "cowl full of nothing" shape without a glow. */
 .wr::after { content: ""; }
 .wr1 { left: 4%;  top: 12%; opacity: 0.085; animation-duration: 30s; }
-.wr2 { right: 3%; top: 34%; opacity: 0.065; animation-duration: 38s; animation-delay: -9s; transform: scaleX(-1); width: clamp(100px, 10vw, 170px); }
+.wr2 { right: 6%; top: 34%; opacity: 0.065; animation-duration: 38s; animation-delay: -9s; transform: scaleX(-1); width: clamp(100px, 10vw, 170px); }
 .wr3 { left: 12%; top: 62%; opacity: 0.05; animation-duration: 44s; animation-delay: -18s; width: clamp(80px, 8vw, 140px); filter: blur(4px); }
 
 @keyframes wraith-drift {
