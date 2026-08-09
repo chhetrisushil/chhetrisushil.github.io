@@ -37,6 +37,15 @@
     <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <link rel="stylesheet" href="styles.css" />
+    <!-- No bundler here, so the browser resolves bare specifiers itself. -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/vendor/three.module.min.js",
+          "three/examples/jsm/utils/BufferGeometryUtils.js": "/vendor/BufferGeometryUtils.js"
+        }
+      }
+    </script>
     <script>
       // Set before first paint so there is no flash of the wrong theme.
       try {
@@ -155,6 +164,7 @@
             <a class="btn btn-ghost" href="https://github.com/chhetrisushil" rel="me noopener">GitHub</a>
           </div>
         </div>
+        <canvas id="architecture" aria-hidden="true"></canvas>
         <div class="glow" aria-hidden="true"></div>
       </section>
 
@@ -320,6 +330,23 @@
         addEventListener("scroll", () => { if (!queued) { queued = true; requestAnimationFrame(apply); } }, { passive: true });
         apply();
       })();
+    </script>
+
+    <script type="module">
+      // Deferred: three is ~85 KB gzipped and nothing above the fold depends on it. If the
+      // import fails or WebGL is missing, the CSS glow behind the canvas is the whole visual.
+      const canvas = document.getElementById("architecture");
+      if (canvas) {
+        const boot = () =>
+          import("./architect.js")
+            .then(({ mountArchitecture }) => {
+              if (mountArchitecture(canvas)) canvas.dataset.on = "true";
+            })
+            .catch(() => {});
+        "requestIdleCallback" in window
+          ? requestIdleCallback(boot, { timeout: 2500 })
+          : setTimeout(boot, 500);
+      }
     </script>
 
     <script>

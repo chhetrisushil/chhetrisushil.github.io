@@ -234,6 +234,30 @@ code {
 }
 
 
+#architecture {
+  position: absolute;
+  /* Anchored to the content column, not the viewport: on a wide display the column is a narrow
+     centred strip, and a viewport-relative canvas drifts off-screen right. */
+  left: 50%;
+  transform: translateX(-8%);
+  width: min(940px, 82vw);
+  top: -3rem;
+  height: min(560px, 96%);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 38%),
+    linear-gradient(to bottom, transparent 2%, #000 26%, #000 68%, transparent 96%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 38%),
+    linear-gradient(to bottom, transparent 2%, #000 26%, #000 68%, transparent 96%);
+  mask-composite: intersect;
+}
+#architecture[data-on] { opacity: 0.7; }
+:root[data-theme="light"] #architecture[data-on] { opacity: 0.82; }
+@media (max-width: 900px) { #architecture { display: none; } }
+
 .eyebrow {
   text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.72rem; font-weight: 700;
   color: var(--accent); margin: 0 0 0.9rem;
