@@ -137,12 +137,20 @@ export function mountWeave(canvas, options = {}) {
   }
   if (!renderer.getContext()) return null;
 
-  // Honour the OS "reduce motion" setting by default. `?motion=1` is a deliberate, per-visit
-  // opt-in for someone who has the setting on system-wide but wants to see this one thing —
-  // an explicit user action, which is the only reason to override an accessibility preference.
+  // Motion is ON by default, including for visitors whose OS asks to reduce it.
+  //
+  // That is a deliberate choice and worth being honest about: `prefers-reduced-motion` exists
+  // because movement can trigger nausea or migraine, so ignoring it outright is not free.
+  // The compromise here is that those visitors get a CALM profile rather than nothing — the
+  // cloth still lives, but slower, with a shallower ripple and no pointer or scroll parallax,
+  // since it is the large, fast, cursor-chasing movement that actually causes trouble.
+  //
+  // `?motion=0` forces the static frame for anyone who needs it; `?motion=1` forces the full
+  // effect regardless.
   const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-  const forced = new URLSearchParams(location.search).get("motion") === "1";
-  const reduced = prefersReduced && !forced;
+  const param = new URLSearchParams(location.search).get("motion");
+  const reduced = param === "0";
+  const calm = param === "1" ? false : prefersReduced;
 
   renderer.setClearColor(0x000000, 0);
   // Supersample, do not merely honour devicePixelRatio. On a scaled display DPR reports 1, so
@@ -166,7 +174,7 @@ export function mountWeave(canvas, options = {}) {
     uniforms: {
       uTime: { value: 0 },
       uSpan: { value: span },
-      uRipple: { value: reduced ? 0 : ripple },
+      uRipple: { value: reduced ? 0 : calm ? ripple * 0.45 : ripple },
       uA: { value: PALETTE.a },
       uB: { value: PALETTE.b },
       uC: { value: PALETTE.c },
@@ -209,7 +217,7 @@ export function mountWeave(canvas, options = {}) {
   const frame = () => {
     raf = requestAnimationFrame(frame);
     material.uniforms.uTime.value = (performance.now() - t0) / 1000;
-    cloth.rotation.y += spin * 0.016;
+    cloth.rotation.y += (calm ? spin * 0.35 : spin) * 0.016;
     // Damped pointer parallax — the cloth drifts toward the cursor rather than snapping.
     cloth.position.x += (targetX - cloth.position.x) * 0.04;
     cloth.position.y += (-targetY + scrollShift - cloth.position.y) * 0.04;
@@ -243,7 +251,9 @@ export function mountWeave(canvas, options = {}) {
   window.addEventListener("resize", onResize, { passive: true });
   document.addEventListener("visibilitychange", onVisibility);
   io.observe(canvas);
-  if (!reduced) {
+  // Pointer- and scroll-linked movement is the part most likely to cause trouble, so the calm
+  // profile drops both and keeps only the ambient drift.
+  if (!reduced && !calm) {
     window.addEventListener("pointermove", onPointer, { passive: true });
     if (parallax) window.addEventListener("scroll", onScroll, { passive: true });
   }
