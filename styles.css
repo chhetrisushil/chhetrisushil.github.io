@@ -236,26 +236,58 @@ code {
 
 #architecture {
   position: absolute;
-  /* Anchored to the content column, not the viewport: on a wide display the column is a narrow
-     centred strip, and a viewport-relative canvas drifts off-screen right. */
+  /* Anchored to the content column, not the viewport — a viewport-relative canvas drifts
+     off-screen on a wide display. */
   left: 50%;
-  transform: translateX(-8%);
-  width: min(940px, 82vw);
-  top: -3rem;
-  height: min(560px, 96%);
+  transform: translateX(6%);
+  width: min(880px, 72vw);
+  top: -3.5rem;
+  height: min(600px, 112%);
   z-index: -1;
   opacity: 0;
   transition: opacity 1.4s ease;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 38%),
-    linear-gradient(to bottom, transparent 2%, #000 26%, #000 68%, transparent 96%);
+  /* Drag-to-rotate needs the pointer, unlike the purely decorative layers behind it. */
+  pointer-events: auto;
+  cursor: grab;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 34%),
+    linear-gradient(to bottom, transparent 1%, #000 16%, #000 78%, transparent 99%);
   -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(to right, transparent, #000 38%),
-    linear-gradient(to bottom, transparent 2%, #000 26%, #000 68%, transparent 96%);
+  mask-image: linear-gradient(to right, transparent, #000 30%),
+    linear-gradient(to bottom, transparent 1%, #000 16%, #000 78%, transparent 99%);
   mask-composite: intersect;
 }
-#architecture[data-on] { opacity: 0.7; }
-:root[data-theme="light"] #architecture[data-on] { opacity: 0.82; }
+#architecture:active { cursor: grabbing; }
+
+.arch-key {
+  position: absolute;
+  right: 6%;
+  top: 1.5rem;
+  display: flex;
+  gap: 0.85rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  opacity: 0;
+  transition: opacity 1.4s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+.arch-key li { display: flex; align-items: center; gap: 0.32rem; }
+.arch-key i {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--c);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--c) 60%, transparent);
+}
+#architecture[data-on] ~ .arch-key { opacity: 0.85; }
+@media (max-width: 900px) { .arch-key { display: none; } }
+/* Higher than a decorative layer would carry: this one has labels meant to be read. */
+#architecture[data-on] { opacity: 0.88; }
+:root[data-theme="light"] #architecture[data-on] { opacity: 0.92; }
 @media (max-width: 900px) { #architecture { display: none; } }
 
 .eyebrow {
