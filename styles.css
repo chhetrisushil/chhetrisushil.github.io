@@ -87,6 +87,11 @@ code {
 /* The one nav item that leaves the site — marked so it doesn't read as another anchor. */
 .hdr nav a.out { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--accent); font-weight: 600; }
 .hdr nav a.out:hover { color: var(--link); }
+/* Visually hidden, still announced. Not display:none — that removes it from the a11y tree. */
+.sr {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+}
 @media (max-width: 560px) { .hdr nav a:not(.out) { display: none; } }
 .icon {
   display: grid; place-items: center; width: 32px; height: 32px;
