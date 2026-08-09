@@ -90,18 +90,22 @@
   fill: currentColor;
   opacity: 0.085;
   filter: blur(2.5px);
-  animation: wraith-drift 26s ease-in-out infinite;
+  animation: wraith-hover 13s ease-in-out infinite;
 }
-/* Lighter than the page in dark mode reads as a ghost; darker reads as a hole. A near-black
-   fill with a faint luminous edge gives the "cowl full of nothing" shape without a glow. */
-.wr::after { content: ""; }
-.wr1 { left: 4%;  top: 12%; opacity: 0.085; animation-duration: 30s; }
-.wr2 { right: 6%; top: 34%; opacity: 0.065; animation-duration: 38s; animation-delay: -9s; transform: scaleX(-1); width: clamp(100px, 10vw, 170px); }
-.wr3 { left: 12%; top: 62%; opacity: 0.05; animation-duration: 44s; animation-delay: -18s; width: clamp(80px, 8vw, 140px); filter: blur(4px); }
+.wr1 { left: 4%;  top: 12%; opacity: 0.085; animation-duration: 13s; }
+.wr2 { right: 6%; top: 34%; opacity: 0.065; animation-duration: 17s; animation-delay: -6s; transform: scaleX(-1); width: clamp(100px, 10vw, 170px); }
+.wr3 { left: 12%; top: 62%; opacity: 0.05; animation-duration: 21s; animation-delay: -11s; width: clamp(80px, 8vw, 140px); filter: blur(4px); }
 
-@keyframes wraith-drift {
-  0%, 100% { translate: 0 0; rotate: -1.5deg; }
-  50%      { translate: 6px -22px; rotate: 1.5deg; }
+/* A hover, not a drift: the figure rises and settles on a slow cycle, swaying a little as it
+   goes. Four stops rather than two so the turn at each end is not symmetrical — a perfect
+   there-and-back reads as a machine, an uneven one reads as floating.
+   `translate`/`rotate` are used instead of `transform` so this never fights the parallax
+   transform applied to the parent layer. */
+@keyframes wraith-hover {
+  0%, 100% { translate: 0 0;         rotate: -1.6deg; }
+  28%      { translate: -5px -16px;  rotate: 0.8deg; }
+  55%      { translate: 4px -26px;   rotate: 1.8deg; }
+  78%      { translate: 6px -11px;   rotate: -0.4deg; }
 }
 @media (prefers-reduced-motion: reduce) { .wr { animation: none; } }
 
