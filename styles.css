@@ -84,6 +84,10 @@ code {
 .hdr nav { display: flex; gap: 1.3rem; margin-right: auto; font-size: 0.9rem; }
 .hdr nav a { color: var(--text-dim); font-weight: 500; }
 .hdr nav a:hover { color: var(--text); text-decoration: none; }
+/* The one nav item that leaves the site — marked so it doesn't read as another anchor. */
+.hdr nav a.out { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--accent); font-weight: 600; }
+.hdr nav a.out:hover { color: var(--link); }
+@media (max-width: 560px) { .hdr nav a:not(.out) { display: none; } }
 .icon {
   display: grid; place-items: center; width: 32px; height: 32px;
   border-radius: 8px; border: 1px solid var(--border);
