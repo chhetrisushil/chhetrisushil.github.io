@@ -63,10 +63,18 @@
              property still drives the theme. -->
         <linearGradient id="tatterFade" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="currentColor" stop-opacity="1" />
-          <stop offset="45%" stop-color="currentColor" stop-opacity="0.55" />
-          <stop offset="78%" stop-color="currentColor" stop-opacity="0.18" />
+          <stop offset="52%" stop-color="currentColor" stop-opacity="0.7" />
+          <stop offset="80%" stop-color="currentColor" stop-opacity="0.3" />
           <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
         </linearGradient>
+        <!-- What stops a vector silhouette reading as a cut-out: fractal noise pushes the
+             edges around, so the cloth frays and dissolves instead of ending on a clean curve.
+             The blur after it takes the last hardness off. -->
+        <filter id="wraithSmoke" x="-40%" y="-15%" width="180%" height="140%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.02 0.045" numOctaves="5" seed="11" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="13" xChannelSelector="R" yChannelSelector="G" result="d" />
+          <feGaussianBlur in="d" stdDeviation="0.7" />
+        </filter>
         <g id="wraith">
           <path d="M60 5c9 0 15 8 14 18-1 8-4 15-8 19-4-1-9-1-13 0-3-5-5-12-4-20C50 12 55 5 60 5z" />
           <path d="M54 41c5-2 12-2 17 1 10 4 18 13 23 25 3 7 5 14 6 21-4-6-10-12-16-16 3 7 5 15 5 22-6-9-13-17-21-22-6-4-13-6-20-6-9 0-17 4-25 10 2-10 6-19 13-26 5-5 11-8 18-9z" />
@@ -87,9 +95,9 @@
       <div class="bg-orbs"></div>
       <div class="bg-weave"></div>
       <div class="bg-wraiths">
-        <svg class="wr wr1" viewBox="0 0 120 400" aria-hidden="true"><use href="#wraith" /></svg>
-        <svg class="wr wr2" viewBox="0 0 120 400" aria-hidden="true"><use href="#wraith" /></svg>
-        <svg class="wr wr3" viewBox="0 0 120 400" aria-hidden="true"><use href="#wraith" /></svg>
+        <svg class="wr wr1" viewBox="-22 0 164 400" aria-hidden="true"><use href="#wraith" filter="url(#wraithSmoke)" /></svg>
+        <svg class="wr wr2" viewBox="-22 0 164 400" aria-hidden="true"><use href="#wraith" filter="url(#wraithSmoke)" /></svg>
+        <svg class="wr wr3" viewBox="-22 0 164 400" aria-hidden="true"><use href="#wraith" filter="url(#wraithSmoke)" /></svg>
       </div>
       <div class="bg-motes"></div>
     </div>
