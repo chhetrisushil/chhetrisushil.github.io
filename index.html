@@ -58,6 +58,8 @@
   </head>
 
   <body>
+    <div class="bg" aria-hidden="true"><div class="bg-weave"></div></div>
+
     <a class="skip" href="#main">Skip to content</a>
 
     <header class="hdr">
@@ -258,6 +260,30 @@
           ? requestIdleCallback(boot, { timeout: 2500 })
           : setTimeout(boot, 500);
       }
+    </script>
+
+    <script>
+      // Page-wide parallax. The layer is position:fixed, so translating it against the scroll
+      // is what produces depth — the hero canvas alone could not show this because it scrolls
+      // away. rAF-coalesced: scroll fires far more often than the screen repaints.
+      (() => {
+        const layer = document.querySelector(".bg-weave");
+        if (!layer) return;
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        let queued = false;
+        const apply = () => {
+          queued = false;
+          // 6% of scroll distance: enough to notice against fixed content, far too little to
+          // read as the page fighting you.
+          layer.style.transform = `translate3d(0, ${window.scrollY * 0.06}px, 0)`;
+        };
+        addEventListener(
+          "scroll",
+          () => { if (!queued) { queued = true; requestAnimationFrame(apply); } },
+          { passive: true }
+        );
+        apply();
+      })();
     </script>
 
     <script>

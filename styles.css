@@ -35,6 +35,50 @@
   --accent-soft: rgba(178, 106, 0, 0.1);
 }
 
+/* Page-wide backdrop ---------------------------------------------------------
+   Two layers: a static wash of colour, and a woven grid that drifts on scroll. The grid is
+   the loom motif again, at a whisper — legible as texture, never as pattern competing with
+   the text. */
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 45% at 18% 8%, rgba(240, 167, 66, 0.09), transparent 70%),
+    radial-gradient(50% 40% at 88% 22%, rgba(160, 107, 255, 0.09), transparent 70%),
+    radial-gradient(45% 35% at 60% 92%, rgba(224, 114, 95, 0.06), transparent 70%);
+}
+.bg-weave {
+  position: absolute;
+  /* Oversized so the drift never exposes an edge. */
+  inset: -14% -6%;
+  opacity: 1;
+  will-change: transform;
+  /* Two spacings, so the drift is legible without the grid becoming a subject in its own
+     right: a coarse weave plus a fainter one at half the pitch. */
+  background-image:
+    repeating-linear-gradient(90deg, rgba(176, 190, 216, 0.11) 0 1px, transparent 1px 72px),
+    repeating-linear-gradient(0deg, rgba(176, 190, 216, 0.095) 0 1px, transparent 1px 72px),
+    repeating-linear-gradient(90deg, rgba(176, 190, 216, 0.045) 0 1px, transparent 1px 36px),
+    repeating-linear-gradient(0deg, rgba(176, 190, 216, 0.04) 0 1px, transparent 1px 36px);
+  -webkit-mask-image: radial-gradient(88% 78% at 50% 34%, #000 30%, transparent 88%);
+  mask-image: radial-gradient(88% 78% at 50% 34%, #000 30%, transparent 88%);
+}
+:root[data-theme="light"] .bg {
+  background:
+    radial-gradient(60% 45% at 18% 8%, rgba(178, 106, 0, 0.07), transparent 70%),
+    radial-gradient(50% 40% at 88% 22%, rgba(111, 63, 214, 0.06), transparent 70%);
+}
+:root[data-theme="light"] .bg-weave {
+  background-image:
+    repeating-linear-gradient(90deg, rgba(40, 55, 80, 0.10) 0 1px, transparent 1px 72px),
+    repeating-linear-gradient(0deg, rgba(40, 55, 80, 0.085) 0 1px, transparent 1px 72px),
+    repeating-linear-gradient(90deg, rgba(40, 55, 80, 0.045) 0 1px, transparent 1px 36px),
+    repeating-linear-gradient(0deg, rgba(40, 55, 80, 0.04) 0 1px, transparent 1px 36px);
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 
 html { background: var(--bg); color-scheme: dark; scroll-behavior: smooth; scroll-padding-top: 76px; }
@@ -43,7 +87,8 @@ html[data-theme="light"] { color-scheme: light; }
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background: var(--bg);
+  /* No background here on purpose: html already paints it, and an opaque background on body
+     paints OVER the z-index:-3 backdrop, which silently hid it entirely. */
   color: var(--text);
   line-height: 1.68;
   -webkit-font-smoothing: antialiased;
