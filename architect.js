@@ -15,12 +15,29 @@
 
 import * as THREE from "three";
 
+// Tiers are coloured along the site's own gradient — amber → coral → violet — rather than the
+// stock blue/purple/green/amber of an architecture diagram. Two things follow from that:
+//
+//  - The ramp is ORDERED, and so is the stack. Violet at the top through amber at the base
+//    means the colour itself says how far down the request has travelled, which four unrelated
+//    hues cannot. Adjacent tiers stay ~26–58° apart in hue, so the legend still resolves.
+//  - Light theme needs its own set. These hues are chosen to glow on near-black; over white,
+//    dimmed by the shading term, they turn to pastel mud. The light values are deeper and more
+//    saturated so they read AS colour on paper — the same split the weave uses.
 const TIERS = {
-  client: { y: 3.1, color: "#4aa3ff", label: "Client" },
-  gateway: { y: 2.0, color: "#a855f7", label: "Gateway" },
-  service: { y: 0.95, color: "#10b981", label: "Service" },
-  data: { y: -0.15, color: "#f0a742", label: "Database" },
+  client: { y: 3.1, dark: "#a06bff", light: "#6a37cc", label: "Client" },
+  gateway: { y: 2.0, dark: "#d566b9", light: "#a63a8b", label: "Gateway" },
+  service: { y: 0.95, dark: "#e2704f", light: "#c04a2f", label: "Service" },
+  data: { y: -0.15, dark: "#f0a742", light: "#b8690a", label: "Database" },
 };
+
+/** Everything else that has to flip with the theme, in one place. */
+const THEME = {
+  dark: { wire: "#9d8fa8", pulse: 0xf0d9a8, ink: "#e7ecf3", halo: "rgba(6,8,13,0.9)", fill: 0.62, wireA: 0.22, grid: 0.5 },
+  light: { wire: "#8c7d97", pulse: 0x8a5a00, ink: "#10141c", halo: "rgba(255,255,255,0.92)", fill: 0.58, wireA: 0.3, grid: 0.7 },
+};
+
+const isLight = () => document.documentElement.dataset.theme === "light";
 
 /** The architecture itself. Everything on screen is derived from this. */
 const NODES = [
@@ -54,8 +71,15 @@ const EDGES = [
   ["inventory", "pg"], ["inventory", "blob"],
 ];
 
-/** A label as a canvas texture on a sprite — self-contained in WebGL, no DOM to keep in sync. */
-function labelSprite(text, dpr) {
+/**
+ * A label as a canvas texture — self-contained in WebGL, no DOM to keep in sync.
+ *
+ * Ink and halo swap with the theme: light text haloed in near-black is legible over the dark
+ * page, and exactly as illegible over the white one. Returns the texture and its aspect so the
+ * caller can size the sprite; the font does not change with the theme, so a re-render on toggle
+ * keeps the same dimensions and only the map has to be replaced.
+ */
+function labelTexture(text, dpr, light) {
   const pad = 12;
   const font = `600 ${26 * dpr}px ui-sans-serif, system-ui, -apple-system, sans-serif`;
   const measure = document.createElement("canvas").getContext("2d");
@@ -69,25 +93,24 @@ function labelSprite(text, dpr) {
   canvas.height = h;
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
+  const t = light ? THEME.light : THEME.dark;
   ctx.font = font;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  // Drawn twice: a dark halo first, so the label stays readable wherever it crosses a beam.
+  // Drawn twice: a halo first, so the label stays readable wherever it crosses a beam.
   ctx.lineWidth = 6 * dpr;
-  ctx.strokeStyle = "rgba(6,8,13,0.9)";
+  ctx.strokeStyle = t.halo;
   ctx.strokeText(text, w / 2, h / 2);
-  ctx.fillStyle = "#e7ecf3";
+  ctx.fillStyle = t.ink;
   ctx.fillText(text, w / 2, h / 2);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.anisotropy = 4;
-  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
-  sprite.scale.set((w / h) * 0.26, 0.26, 1);
-  return sprite;
+  return { tex, aspect: w / h };
 }
 
 export function mountArchitecture(canvas, options = {}) {
-  const { opacity = 1, spin = 0.1 } = options;
+  const { spin = 0.1 } = options;
 
   let renderer;
   try {
@@ -125,44 +148,49 @@ export function mountArchitecture(canvas, options = {}) {
   world.add(grid);
 
   const byId = new Map();
+  // Held so the theme switch can recolour in place rather than rebuild the scene.
+  const tinted = []; // { tier, fill, edge }
+  const labels = []; // { sprite, text }
 
   // Slabs.
   for (const n of NODES) {
     const tier = TIERS[n.tier];
-    const color = new THREE.Color(tier.color);
     const g = new THREE.BoxGeometry(1.15, 0.16, 0.85);
-    const m = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.62 });
+    const m = new THREE.MeshBasicMaterial({ transparent: true });
     const slab = new THREE.Mesh(g, m);
     slab.position.set(n.x, tier.y, n.z);
     world.add(slab);
 
     // A brighter wireframe over the fill reads as an edge-lit panel rather than a flat box.
-    const edges = new THREE.LineSegments(
-      new THREE.EdgesGeometry(g),
-      new THREE.LineBasicMaterial({ color: color.clone().offsetHSL(0, 0, 0.18), transparent: true, opacity: 0.95 })
-    );
+    const edgeMat = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.95 });
+    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(g), edgeMat);
     edges.position.copy(slab.position);
     world.add(edges);
+    tinted.push({ tier: n.tier, fill: m, edge: edgeMat });
 
-    const sprite = labelSprite(n.label, Math.min(dpr, 2));
-    if (sprite) {
+    const label = labelTexture(n.label, Math.min(dpr, 2), isLight());
+    if (label) {
+      const sprite = new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: label.tex, transparent: true, depthTest: false })
+      );
+      sprite.scale.set(label.aspect * 0.26, 0.26, 1);
       sprite.position.set(n.x, tier.y + 0.38, n.z);
       world.add(sprite);
+      labels.push({ sprite, text: n.label });
     }
     byId.set(n.id, slab.position);
   }
 
   // Edges between tiers.
   const flowPoints = [];
+  const wires = [];
   for (const [from, to] of EDGES) {
     const a = byId.get(from);
     const b = byId.get(to);
     if (!a || !b) continue;
-    const line = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints([a, b]),
-      new THREE.LineBasicMaterial({ color: 0x8aa0bd, transparent: true, opacity: 0.22 })
-    );
-    world.add(line);
+    const wireMat = new THREE.LineBasicMaterial({ transparent: true });
+    world.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), wireMat));
+    wires.push(wireMat);
     flowPoints.push([a, b]);
   }
 
@@ -177,9 +205,32 @@ export function mountArchitecture(canvas, options = {}) {
   world.add(pulses);
 
   const applyTheme = () => {
-    const light = document.documentElement.dataset.theme === "light";
-    for (const m of Array.isArray(gm) ? gm : [gm]) m.opacity = light ? 0.7 : 0.5;
-    pulses.material.color.set(light ? 0x8a5a00 : 0xf0d9a8);
+    const light = isLight();
+    const t = light ? THEME.light : THEME.dark;
+
+    for (const m of Array.isArray(gm) ? gm : [gm]) m.opacity = t.grid;
+    pulses.material.color.set(t.pulse);
+
+    for (const { tier, fill, edge } of tinted) {
+      const c = new THREE.Color(light ? TIERS[tier].light : TIERS[tier].dark);
+      fill.color.copy(c);
+      fill.opacity = t.fill;
+      // Lighten the outline on dark, darken it on light — either way the edge stays the
+      // brighter-contrast one against its own fill.
+      edge.color.copy(c).offsetHSL(0, 0, light ? -0.14 : 0.18);
+    }
+    for (const w of wires) {
+      w.color.set(t.wire);
+      w.opacity = t.wireA;
+    }
+    // Labels are baked pixels, so a theme change means redrawing them, not recolouring.
+    for (const { sprite, text } of labels) {
+      const next = labelTexture(text, Math.min(dpr, 2), light);
+      if (!next) continue;
+      sprite.material.map?.dispose();
+      sprite.material.map = next.tex;
+      sprite.material.needsUpdate = true;
+    }
   };
   applyTheme();
   const themeObserver = new MutationObserver(() => {

@@ -283,6 +283,16 @@ code {
   background: var(--c);
   box-shadow: 0 0 6px color-mix(in srgb, var(--c) 60%, transparent);
 }
+/* The swatches must track the tier colours in architect.js — including their light-theme set,
+   which is why these are classes here rather than a hex inlined on each <li>. */
+.k-client { --c: #a06bff; }
+.k-gateway { --c: #d566b9; }
+.k-service { --c: #e2704f; }
+.k-data { --c: #f0a742; }
+:root[data-theme="light"] .k-client { --c: #6a37cc; }
+:root[data-theme="light"] .k-gateway { --c: #a63a8b; }
+:root[data-theme="light"] .k-service { --c: #c04a2f; }
+:root[data-theme="light"] .k-data { --c: #b8690a; }
 #architecture[data-on] ~ .arch-key { opacity: 0.85; }
 @media (max-width: 900px) { .arch-key { display: none; } }
 /* Higher than a decorative layer would carry: this one has labels meant to be read. */
