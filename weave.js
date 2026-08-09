@@ -52,9 +52,9 @@ function buildFabric({ threads, span, amplitude, radius }) {
     for (let i = 0; i < threads; i++) {
       const geo = new THREE.TubeGeometry(
         threadCurve(axis, i, threads, span, amplitude),
-        threads * 5, // tubular segments — enough to keep the weave smooth
+        threads * 9, // tubular segments — a coarse sweep shows as facets along each thread
         radius,
-        5, // radial segments; the tube is thin, 5 reads as round
+        9, // radial segments; 5 gives a visibly polygonal silhouette on a large canvas
         false
       );
       parts.push(geo);
@@ -124,6 +124,9 @@ export function mountWeave(canvas, options = {}) {
     ripple = 0.12,
     opacity = 0.95,
     spin = 0.055,
+    // Vertical drift per pixel scrolled. 0 disables. Small on purpose: parallax that outruns
+    // the page reads as a bug rather than depth.
+    parallax = 0,
   } = options;
 
   let renderer;
@@ -134,11 +137,19 @@ export function mountWeave(canvas, options = {}) {
   }
   if (!renderer.getContext()) return null;
 
-  const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+  // Honour the OS "reduce motion" setting by default. `?motion=1` is a deliberate, per-visit
+  // opt-in for someone who has the setting on system-wide but wants to see this one thing —
+  // an explicit user action, which is the only reason to override an accessibility preference.
+  const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+  const forced = new URLSearchParams(location.search).get("motion") === "1";
+  const reduced = prefersReduced && !forced;
 
   renderer.setClearColor(0x000000, 0);
-  // Cap DPR: a hero canvas at 3x on a retina phone is a lot of fragments for decoration.
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  // Supersample, do not merely honour devicePixelRatio. On a scaled display DPR reports 1, so
+  // rendering 1:1 leaves these thin tubes stair-stepped even with MSAA on. Render above the
+  // CSS size and let the browser downsample; cap it so a retina phone is not asked for 3x.
+  const dpr = window.devicePixelRatio || 1;
+  renderer.setPixelRatio(Math.min(Math.max(dpr, 1.8), 2.5));
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
@@ -184,6 +195,11 @@ export function mountWeave(canvas, options = {}) {
     targetY = (e.clientY / window.innerHeight - 0.5) * 0.2;
   };
 
+  let scrollShift = 0;
+  const onScroll = () => {
+    scrollShift = -(window.scrollY || 0) * parallax;
+  };
+
   // performance.now(), not THREE.Clock — the latter is deprecated in three 0.185, and a start
   // stamp is all the shader needs.
   const t0 = performance.now();
@@ -196,7 +212,7 @@ export function mountWeave(canvas, options = {}) {
     cloth.rotation.y += spin * 0.016;
     // Damped pointer parallax — the cloth drifts toward the cursor rather than snapping.
     cloth.position.x += (targetX - cloth.position.x) * 0.04;
-    cloth.position.y += (-targetY - cloth.position.y) * 0.04;
+    cloth.position.y += (-targetY + scrollShift - cloth.position.y) * 0.04;
     renderer.render(scene, camera);
   };
 
@@ -227,7 +243,10 @@ export function mountWeave(canvas, options = {}) {
   window.addEventListener("resize", onResize, { passive: true });
   document.addEventListener("visibilitychange", onVisibility);
   io.observe(canvas);
-  if (!reduced) window.addEventListener("pointermove", onPointer, { passive: true });
+  if (!reduced) {
+    window.addEventListener("pointermove", onPointer, { passive: true });
+    if (parallax) window.addEventListener("scroll", onScroll, { passive: true });
+  }
 
   // Reduced motion still gets the object — just held still, rendered once.
   renderer.render(scene, camera);
@@ -238,6 +257,7 @@ export function mountWeave(canvas, options = {}) {
     io.disconnect();
     window.removeEventListener("resize", onResize);
     window.removeEventListener("pointermove", onPointer);
+    window.removeEventListener("scroll", onScroll);
     document.removeEventListener("visibilitychange", onVisibility);
     geometry.dispose();
     material.dispose();

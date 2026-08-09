@@ -110,22 +110,27 @@ code {
 }
 #weave {
   position: absolute;
-  inset: -1rem -12% 1rem auto;
-  width: 62%;
+  /* Anchored to the CONTENT column, not the viewport. On a wide display the column is a narrow
+     centred strip, so a viewport-relative canvas drifts off to the right and reads as "small
+     and over there". Centre on the column, then bias right so it sits beside the copy. */
+  left: 50%;
+  transform: translateX(-14%);
+  width: min(1080px, 88vw);
+  top: -1.5rem;
+  /* Ends well above the hero's clip so the fade finishes on its own rather than being cut. */
+  height: min(460px, 78%);
   z-index: -1;
   opacity: 0;
   transition: opacity 1.4s ease;
   pointer-events: none;
-  /* Faded on every edge that could reach the copy — decoration must never cost legibility. */
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 45%),
-    linear-gradient(to bottom, transparent, #000 28%, #000 76%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 40%),
+    linear-gradient(to bottom, transparent 2%, #000 34%, #000 58%, transparent 92%);
   -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(to right, transparent, #000 45%),
-    linear-gradient(to bottom, transparent, #000 28%, #000 76%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 40%),
+    linear-gradient(to bottom, transparent 2%, #000 34%, #000 58%, transparent 92%);
   mask-composite: intersect;
 }
-#weave[data-on] { opacity: 0.4; }
-/* Narrow enough and there is nowhere to put it that is not under the text. */
+#weave[data-on] { opacity: 0.55; }
 @media (max-width: 900px) { #weave { display: none; } }
 
 .eyebrow {

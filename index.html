@@ -249,7 +249,7 @@
         const boot = () =>
           import("./weave.js")
             .then(({ mountWeave }) => {
-              if (mountWeave(canvas, { threads: 13, opacity: 0.9, spin: 0.045 })) {
+              if (mountWeave(canvas, { threads: 13, opacity: 0.95, spin: 0.05, parallax: 0.0016 })) {
                 canvas.dataset.on = "true";
               }
             })
