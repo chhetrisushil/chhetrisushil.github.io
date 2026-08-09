@@ -72,6 +72,42 @@
   mask-image: radial-gradient(88% 78% at 50% 34%, #000 30%, transparent 88%);
 }
 
+/* Wraiths — hooded silhouettes drifting between the weave and the motes.
+   Kept at the edge of perception on purpose: a background figure you NOTICE is a distraction,
+   one you half-see is atmosphere. Heavy blur, very low opacity, and never over the text
+   column — they live in the outer thirds. */
+.bg-wraiths { inset: -24% -8%; }
+.wr {
+  position: absolute;
+  width: clamp(120px, 13vw, 210px);
+  height: auto;
+  /* Slightly LIGHTER than the page: a fill darker than the background is invisible on it.
+     Cool and desaturated so it reads as a shade, never as a solid object. */
+  fill: #9fb0c8;
+  opacity: 0.075;
+  filter: blur(2.5px);
+  animation: wraith-drift 26s ease-in-out infinite;
+}
+/* Lighter than the page in dark mode reads as a ghost; darker reads as a hole. A near-black
+   fill with a faint luminous edge gives the "cowl full of nothing" shape without a glow. */
+.wr::after { content: ""; }
+.wr1 { left: 4%;  top: 12%; opacity: 0.085; animation-duration: 30s; }
+.wr2 { right: 3%; top: 34%; opacity: 0.065; animation-duration: 38s; animation-delay: -9s; transform: scaleX(-1); width: clamp(100px, 10vw, 170px); }
+.wr3 { left: 12%; top: 62%; opacity: 0.05; animation-duration: 44s; animation-delay: -18s; width: clamp(80px, 8vw, 140px); filter: blur(4px); }
+
+@keyframes wraith-drift {
+  0%, 100% { translate: 0 0; rotate: -1.5deg; }
+  50%      { translate: 6px -22px; rotate: 1.5deg; }
+}
+@media (prefers-reduced-motion: reduce) { .wr { animation: none; } }
+
+/* In light mode a near-black silhouette is far too loud, so they become a soft grey haze. */
+:root[data-theme="light"] .wr { fill: #7d8698; opacity: 0.16; filter: blur(3.5px); }
+:root[data-theme="light"] .wr3 { opacity: 0.1; }
+
+/* Below the text/graphic split there is no outer third to hide in. */
+@media (max-width: 900px) { .bg-wraiths { display: none; } }
+
 /* NEAR — sparse motes, the fastest layer. Two tiled fields at different pitches so the
    spacing never resolves into an obvious repeat. */
 .bg-motes {
