@@ -37,6 +37,16 @@
     <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <link rel="stylesheet" href="styles.css" />
+    <!-- No bundler here, so bare specifiers are resolved by the browser. This is what lets
+         weave.js be byte-identical to the copy the Loom docs site bundles. -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/vendor/three.module.min.js",
+          "three/examples/jsm/utils/BufferGeometryUtils.js": "/vendor/BufferGeometryUtils.js"
+        }
+      }
+    </script>
     <script>
       // Set before first paint so there is no flash of the wrong theme.
       try {
@@ -102,6 +112,7 @@
           </div>
         </div>
         <div class="glow" aria-hidden="true"></div>
+        <canvas id="weave" aria-hidden="true"></canvas>
       </section>
 
       <!-- Loom ------------------------------------------------------------- -->
@@ -229,6 +240,25 @@
         <p>© <span id="yr">2026</span> Sushil Chhetri · Bengaluru</p>
       </div>
     </footer>
+
+    <script type="module">
+      // Loaded on idle, never on the critical path. If WebGL is missing or the import fails,
+      // the CSS glow behind it is the whole visual and nothing breaks.
+      const canvas = document.getElementById("weave");
+      if (canvas) {
+        const boot = () =>
+          import("./weave.js")
+            .then(({ mountWeave }) => {
+              if (mountWeave(canvas, { threads: 13, opacity: 0.9, spin: 0.045 })) {
+                canvas.dataset.on = "true";
+              }
+            })
+            .catch(() => {});
+        "requestIdleCallback" in window
+          ? requestIdleCallback(boot, { timeout: 2500 })
+          : setTimeout(boot, 500);
+      }
+    </script>
 
     <script>
       document.getElementById("theme").addEventListener("click", () => {
