@@ -37,16 +37,6 @@
     <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <link rel="stylesheet" href="styles.css" />
-    <!-- No bundler here, so bare specifiers are resolved by the browser. This is what lets
-         weave.js be byte-identical to the copy the Loom docs site bundles. -->
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "/vendor/three.module.min.js",
-          "three/examples/jsm/utils/BufferGeometryUtils.js": "/vendor/BufferGeometryUtils.js"
-        }
-      }
-    </script>
     <script>
       // Set before first paint so there is no flash of the wrong theme.
       try {
@@ -62,22 +52,44 @@
          IS the parallax — a single layer, however pretty, only ever reads as a texture. -->
     <svg width="0" height="0" aria-hidden="true" style="position:absolute">
       <defs>
-        <!-- A hooded, ragged silhouette: the generic wraith archetype, drawn from scratch
-             rather than traced from any particular depiction. Shoulders, a deep empty hood,
-             and a cloak that frays into nothing at the hem. -->
-        <path
-          id="wraith"
-          d="M50 6c13 0 22 10 22 23 0 8-3 13-6 17 3 3 6 8 8 14 5 15 8 34 7 52-1 13-4 24-8 32-2-8-4-13-6-16-1 7-3 14-6 19-2-7-4-13-6-16-2 6-4 12-7 18-3-7-5-14-6-20-2 4-4 10-6 17-4-9-7-21-8-34-1-18 2-37 7-52 2-6 5-11 8-14-3-4-6-9-6-17C28 16 37 6 50 6zm0 12c-7 0-12 5-12 12 0 6 3 11 7 14 2-4 3-9 5-9s3 5 5 9c4-3 7-8 7-14 0-7-5-12-12-12z"
-        />
+        <!-- A hooded wraith, drawn from scratch to the ARCHETYPE the reference concept art
+             uses: a smooth featureless head, hunched shoulders with reaching claws, and a body
+             that dissolves into long streaming tatters. Gesture and proportion, not a trace —
+             and the inspiration is not named anywhere a visitor sees.
+
+             The tatters fade along their LENGTH via a gradient rather than each carrying a flat
+             opacity: a ribbon of uniform tone reads as a cut-out shape, one that thins to
+             nothing reads as cloth dissolving. Stops use currentColor so the CSS `color`
+             property still drives the theme. -->
+        <linearGradient id="tatterFade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="currentColor" stop-opacity="1" />
+          <stop offset="45%" stop-color="currentColor" stop-opacity="0.55" />
+          <stop offset="78%" stop-color="currentColor" stop-opacity="0.18" />
+          <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
+        </linearGradient>
+        <g id="wraith">
+          <path d="M60 5c9 0 15 8 14 18-1 8-4 15-8 19-4-1-9-1-13 0-3-5-5-12-4-20C50 12 55 5 60 5z" />
+          <path d="M54 41c5-2 12-2 17 1 10 4 18 13 23 25 3 7 5 14 6 21-4-6-10-12-16-16 3 7 5 15 5 22-6-9-13-17-21-22-6-4-13-6-20-6-9 0-17 4-25 10 2-10 6-19 13-26 5-5 11-8 18-9z" />
+          <path d="M38 64c-4 1-9 5-11 9 3-1 7-2 10-2-4 2-7 6-8 10 3-2 7-4 11-5-2 3-4 7-4 11 4-5 8-9 13-11l3-10z" />
+          <path d="M86 72c5 2 8 7 9 12-3-2-7-4-10-4 3 3 6 7 7 11-4-3-7-6-11-7 2 4 3 8 2 11-3-5-7-9-11-13l-1-10z" />
+          <!-- Body: solid at the shoulders, already thinning by the hem. -->
+          <path fill="url(#tatterFade)" d="M50 76c9-3 19-3 28 1 7 10 10 23 9 38-1 18-6 36-14 53-4 9-9 18-14 26-2-9-3-19-2-28-5 11-11 21-18 30 0-12 2-23 5-34-6 8-13 15-21 20 4-11 10-21 17-30-8 3-16 5-25 5 9-6 18-11 28-14-8-2-15-6-21-12 10 1 19 4 28 8-3-15-4-30-3-45 1-7 2-13 3-18z" />
+          <!-- Tatters: long, uneven, each dissolving before it ends. -->
+          <path fill="url(#tatterFade)" d="M76 150c5 22 4 45-2 67-5 19-13 37-23 54-1 6-3 12-5 18 1-24 5-47 11-70 6-23 13-46 19-69z" />
+          <path fill="url(#tatterFade)" d="M89 132c7 20 9 42 5 64-4 21-12 41-23 59-3 5-6 10-9 15 4-24 10-47 15-70 5-23 9-45 12-68z" />
+          <path fill="url(#tatterFade)" d="M60 172c2 22-2 44-9 65-6 18-14 35-24 50-2 4-5 8-7 11 5-22 11-43 18-64 7-21 15-41 22-62z" />
+          <path fill="url(#tatterFade)" d="M102 156c4 19 2 39-4 58-6 19-15 36-26 52-3 4-6 8-9 12 6-21 13-41 20-61 7-20 14-40 19-61z" />
+          <path fill="url(#tatterFade)" d="M44 190c0 18-4 36-11 53-6 15-14 29-23 42 4-19 10-37 17-55 6-14 12-27 17-40z" />
+        </g>
       </defs>
     </svg>
     <div class="bg" aria-hidden="true">
       <div class="bg-orbs"></div>
       <div class="bg-weave"></div>
       <div class="bg-wraiths">
-        <svg class="wr wr1" viewBox="0 0 100 170" aria-hidden="true"><use href="#wraith" /></svg>
-        <svg class="wr wr2" viewBox="0 0 100 170" aria-hidden="true"><use href="#wraith" /></svg>
-        <svg class="wr wr3" viewBox="0 0 100 170" aria-hidden="true"><use href="#wraith" /></svg>
+        <svg class="wr wr1" viewBox="0 0 120 400" aria-hidden="true"><use href="#wraith" /></svg>
+        <svg class="wr wr2" viewBox="0 0 120 400" aria-hidden="true"><use href="#wraith" /></svg>
+        <svg class="wr wr3" viewBox="0 0 120 400" aria-hidden="true"><use href="#wraith" /></svg>
       </div>
       <div class="bg-motes"></div>
     </div>
@@ -136,7 +148,6 @@
           </div>
         </div>
         <div class="glow" aria-hidden="true"></div>
-        <canvas id="weave" aria-hidden="true"></canvas>
       </section>
 
       <!-- Loom ------------------------------------------------------------- -->
@@ -265,24 +276,6 @@
       </div>
     </footer>
 
-    <script type="module">
-      // Loaded on idle, never on the critical path. If WebGL is missing or the import fails,
-      // the CSS glow behind it is the whole visual and nothing breaks.
-      const canvas = document.getElementById("weave");
-      if (canvas) {
-        const boot = () =>
-          import("./weave.js")
-            .then(({ mountWeave }) => {
-              if (mountWeave(canvas, { threads: 13, opacity: 0.95, spin: 0.05, parallax: 0.0016 })) {
-                canvas.dataset.on = "true";
-              }
-            })
-            .catch(() => {});
-        "requestIdleCallback" in window
-          ? requestIdleCallback(boot, { timeout: 2500 })
-          : setTimeout(boot, 500);
-      }
-    </script>
 
     <script>
       // Layered parallax. One scroll handler drives every layer, rAF-coalesced, because scroll

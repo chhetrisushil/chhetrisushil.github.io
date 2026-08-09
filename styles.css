@@ -79,12 +79,13 @@
 .bg-wraiths { inset: -24% -8%; }
 .wr {
   position: absolute;
-  width: clamp(120px, 13vw, 210px);
+  width: clamp(120px, 12vw, 200px);
   height: auto;
   /* Slightly LIGHTER than the page: a fill darker than the background is invisible on it.
      Cool and desaturated so it reads as a shade, never as a solid object. */
-  fill: #9fb0c8;
-  opacity: 0.075;
+  color: #9fb0c8;
+  fill: currentColor;
+  opacity: 0.085;
   filter: blur(2.5px);
   animation: wraith-drift 26s ease-in-out infinite;
 }
@@ -102,7 +103,7 @@
 @media (prefers-reduced-motion: reduce) { .wr { animation: none; } }
 
 /* In light mode a near-black silhouette is far too loud, so they become a soft grey haze. */
-:root[data-theme="light"] .wr { fill: #7d8698; opacity: 0.16; filter: blur(3.5px); }
+:root[data-theme="light"] .wr { color: #7d8698; opacity: 0.16; filter: blur(3.5px); }
 :root[data-theme="light"] .wr3 { opacity: 0.1; }
 
 /* Below the text/graphic split there is no outer third to hide in. */
@@ -223,33 +224,7 @@ code {
     radial-gradient(48% 48% at 42% 50%, rgba(240, 167, 66, 0.15), transparent 70%),
     radial-gradient(36% 36% at 72% 40%, rgba(160, 107, 255, 0.15), transparent 70%);
 }
-#weave {
-  position: absolute;
-  /* Anchored to the CONTENT column, not the viewport. On a wide display the column is a narrow
-     centred strip, so a viewport-relative canvas drifts off to the right and reads as "small
-     and over there". Centre on the column, then bias right so it sits beside the copy. */
-  left: 50%;
-  transform: translateX(-14%);
-  width: min(1080px, 88vw);
-  top: -1.5rem;
-  /* Ends well above the hero's clip so the fade finishes on its own rather than being cut. */
-  height: min(460px, 78%);
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 1.4s ease;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 40%),
-    linear-gradient(to bottom, transparent 2%, #000 34%, #000 58%, transparent 92%);
-  -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(to right, transparent, #000 40%),
-    linear-gradient(to bottom, transparent 2%, #000 34%, #000 58%, transparent 92%);
-  mask-composite: intersect;
-}
-#weave[data-on] { opacity: 0.55; }
-/* Deeper light-mode threads can carry more presence without shouting; at 0.55 they wash out
-   against white, which was half of why light mode looked wrong. */
-:root[data-theme="light"] #weave[data-on] { opacity: 0.72; }
-@media (max-width: 900px) { #weave { display: none; } }
+
 
 .eyebrow {
   text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.72rem; font-weight: 700;
