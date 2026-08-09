@@ -239,10 +239,10 @@ code {
   /* Anchored to the content column, not the viewport — a viewport-relative canvas drifts
      off-screen on a wide display. */
   left: 50%;
-  transform: translateX(6%);
-  width: min(880px, 72vw);
-  top: -3.5rem;
-  height: min(600px, 112%);
+  transform: translateX(11%);
+  width: min(1000px, 80vw);
+  top: -4.5rem;
+  height: min(680px, 126%);
   z-index: -1;
   opacity: 0;
   transition: opacity 1.4s ease;

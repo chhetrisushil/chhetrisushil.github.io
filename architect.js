@@ -82,7 +82,7 @@ function labelSprite(text, dpr) {
   const tex = new THREE.CanvasTexture(canvas);
   tex.anisotropy = 4;
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
-  sprite.scale.set((w / h) * 0.2, 0.2, 1);
+  sprite.scale.set((w / h) * 0.26, 0.26, 1);
   return sprite;
 }
 
@@ -108,8 +108,8 @@ export function mountArchitecture(canvas, options = {}) {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-  camera.position.set(8.2, 7.0, 10.4);
-  camera.lookAt(0, 1.35, 0);
+  camera.position.set(7.0, 6.0, 8.9);
+  camera.lookAt(0, 1.3, 0);
 
   const world = new THREE.Group();
   scene.add(world);
@@ -146,7 +146,7 @@ export function mountArchitecture(canvas, options = {}) {
 
     const sprite = labelSprite(n.label, Math.min(dpr, 2));
     if (sprite) {
-      sprite.position.set(n.x, tier.y + 0.34, n.z);
+      sprite.position.set(n.x, tier.y + 0.38, n.z);
       world.add(sprite);
     }
     byId.set(n.id, slab.position);
