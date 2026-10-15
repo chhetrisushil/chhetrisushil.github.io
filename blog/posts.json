@@ -1,5 +1,17 @@
 [
   {
+    "slug": "share-attention-not-dashboards",
+    "title": "Share attention, not dashboards",
+    "date": "2026-10-15",
+    "summary": "Contextual collaboration on AI-generated UI: a focus handoff carries what the sender wanted looked at, not just the link. The design, why it is deliberately not a commenting system, and what checking it against Loom and loom-ui corrected.",
+    "tags": [
+      "genui",
+      "loom",
+      "loom-ui",
+      "collaboration"
+    ]
+  },
+  {
     "slug": "experience-runtime",
     "title": "Your Agent's Answer Deserves a Picture. It Shouldn't Have to Draw One.",
     "date": "2026-10-15",

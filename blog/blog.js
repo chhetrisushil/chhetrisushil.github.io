@@ -170,6 +170,15 @@ async function renderPost(root) {
     code.parentElement.replaceWith(fig);
     figs.push(fig);
   }
+  // A post's images live beside it in blog/posts/<slug>/, and the markdown references them
+  // relatively (`images/x.png`), so it previews the same in an editor as on the site.
+  const assetBase = new URL(`/blog/posts/${encodeURIComponent(post.slug)}/`, location.origin);
+  for (const img of body.querySelectorAll("img[src]")) {
+    const src = img.getAttribute("src");
+    if (!/^([a-z]+:|\/)/i.test(src)) img.src = new URL(src, assetBase).href;
+    img.loading = "lazy";
+    img.decoding = "async";
+  }
   // External links leave the site; mark them so.
   for (const a of body.querySelectorAll('a[href^="http"]')) {
     if (new URL(a.href).origin !== location.origin) a.rel = "noopener noreferrer";

@@ -424,7 +424,16 @@ h1 { font-size: clamp(2.1rem, 5.6vw, 3.1rem); margin: 0 0 1.3rem; }
 .prose li { margin: 0.3rem 0; }
 .prose blockquote { border-left: 2px solid var(--accent); padding: 0.1rem 0 0.1rem 1rem; color: var(--text-faint); }
 .prose hr { border: 0; border-top: 1px solid var(--border); margin: 2.2rem 0; }
-.prose img { max-width: 100%; height: auto; border-radius: 8px; }
+.prose img {
+  display: block; max-width: 100%; height: auto; margin: 0 auto;
+  border: 1px solid var(--border); border-radius: 10px;
+}
+/* `![alt](src)` followed by an `*italic line*` is a figure with a caption. */
+.prose p:has(> img) { margin: 1.8rem 0; }
+.prose p:has(> img) > em {
+  display: block; margin-top: 0.6rem; text-align: center;
+  font-size: 0.86rem; color: var(--text-faint);
+}
 .prose code { white-space: normal; }
 .prose pre {
   background: var(--bg-inset); border: 1px solid var(--border); border-radius: 10px;
