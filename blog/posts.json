@@ -1,0 +1,9 @@
+[
+  {
+    "slug": "state-is-a-fold",
+    "title": "State is a fold, not a blob",
+    "date": "2026-10-15",
+    "summary": "Why Loom records every step as an immutable event and derives state from the log — and what that buys you when a workflow has to survive a crash, a redeploy, or a human taking three days to approve.",
+    "tags": ["loom", "durable execution"]
+  }
+]
