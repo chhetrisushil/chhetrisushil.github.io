@@ -1,9 +1,24 @@
 [
   {
+    "slug": "experience-runtime",
+    "title": "Your Agent's Answer Deserves a Picture. It Shouldn't Have to Draw One.",
+    "date": "2026-10-15",
+    "summary": "Agents do an analyst's work and then flatten it into paragraphs. An experience runtime treats the visual as a projection of the execution record: built from evidence, silent by default, rendered per surface, and turned into the next question. Plus how to build it on Loom and loom-ui.",
+    "tags": [
+      "agents",
+      "experience runtime",
+      "loom",
+      "loom-ui"
+    ]
+  },
+  {
     "slug": "state-is-a-fold",
     "title": "State is a fold, not a blob",
     "date": "2026-10-15",
     "summary": "Why Loom records every step as an immutable event and derives state from the log — and what that buys you when a workflow has to survive a crash, a redeploy, or a human taking three days to approve.",
-    "tags": ["loom", "durable execution"]
+    "tags": [
+      "loom",
+      "durable execution"
+    ]
   }
 ]
