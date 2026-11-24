@@ -1,5 +1,16 @@
 [
   {
+    "slug": "authority-for-a-task",
+    "title": "Agents need authority for a task, not for life",
+    "date": "2026-11-24",
+    "summary": "A valid credential does not say whose work is being done. An idea I am exploring: grants, leases and lineage attached to the task instead of the agent, the two-agent test it has to pass, and how far Loom's task-authority package gets.",
+    "tags": [
+      "agents",
+      "authorization",
+      "loom"
+    ]
+  },
+  {
     "slug": "share-attention-not-dashboards",
     "title": "Share attention, not dashboards",
     "date": "2026-10-15",
