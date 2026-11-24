@@ -1,5 +1,16 @@
 [
   {
+    "slug": "gloss-a-language-for-reading",
+    "title": "Gloss: a fun project, a language for reading",
+    "date": "2026-11-24",
+    "summary": "A fun side project: a small language that reads like plain sentences and compiles to a static x86-64 Linux executable with no dependencies. What it looks like, the rules it follows, careful file handling, and how agents build it one small PR at a time.",
+    "tags": [
+      "gloss",
+      "compilers",
+      "fun project"
+    ]
+  },
+  {
     "slug": "authority-for-a-task",
     "title": "Agents need authority for a task, not for life",
     "date": "2026-11-24",
