@@ -59,7 +59,7 @@ The messages are part of the language design. The tests check every one of them 
 
 ## Tables and files
 
-The part I am working on now is tables. A record describes a row, and a table ties a list of records to a CSV file:
+The biggest part so far is tables. A record describes a row, and a table ties a list of records to a CSV file:
 
 ```gloss
 record Expense
@@ -100,7 +100,7 @@ flowchart LR
     X --> E["static ELF<br/>executable"]
 ```
 
-Even the runtime is written in the compiler's own intermediate representation: printing numbers, growing lists, parsing CSV, checking UTF-8. The same backend lowers it as the user's program, so "nothing hidden" holds all the way down. A later milestone adds `gloss explain`, which will print each source line beside the machine instructions it became, runtime routines included.
+Even the runtime is written in the compiler's own intermediate representation: printing numbers, growing lists, parsing CSV, checking UTF-8. The same backend lowers it as the user's program, so "nothing hidden" holds all the way down. `gloss explain` prints each source line beside the machine instructions it became, runtime routines included.
 
 That choice makes testing interesting. Next to the real backend there is a small interpreter for the IR that exists only in the tests. Every test program runs twice, once as a real Linux executable and once in the interpreter, and the two must agree on output, errors and exit status. When they disagree, one of them has a bug, and finding which has caught quite a few real ones. The file tests go further: the interpreter models the file system, and the test suite compares what each run leaves on disk, down to which files were flushed and in what order.
 
@@ -124,15 +124,17 @@ It is a slightly absurd amount of process for a toy language. It is also the mos
 |---|---|---|
 | 1 | Lexer, parser, checker, `gloss format` | Done |
 | 2 | Code generation: `gloss build` writes an x86-64 Linux executable | Done |
-| 3 | Tables and files: CSV `load` and `save`, file permissions | In progress |
-| 4 | `gloss test`: test blocks inside the program | Planned |
-| 5–7 | `gloss trace`, `gloss explain`, `gloss flowchart` | Planned |
+| 3 | Tables and files: CSV `load` and `save`, file permissions | Done |
+| 4 | `gloss test`: test blocks inside the program | Done |
+| 5 | `gloss trace`: a run narrated in plain words | Done |
+| 6 | `gloss explain`: the machine code beside each source line | Done |
+| 7 | `gloss flowchart`: an SVG chart of each feature | Done |
 
-The last three are the ones I am most looking forward to:
+Every milestone in the original plan is now done. The last three were the ones I was most looking forward to:
 
 - `gloss trace` narrates a run in plain words.
-- `gloss explain` shows the machine code behind each line.
-- `gloss flowchart` draws each feature as a diagram.
+- `gloss explain` shows the machine code behind each line, the runtime included.
+- `gloss flowchart` draws each feature as a diagram, with a box for every statement.
 
 Together they are the point of the whole thing: a program you can read, run, watch and see through.
 
