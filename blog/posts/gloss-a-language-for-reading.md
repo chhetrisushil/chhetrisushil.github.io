@@ -104,6 +104,105 @@ Even the runtime is written in the compiler's own intermediate representation: p
 
 That choice makes testing interesting. Next to the real backend there is a small interpreter for the IR that exists only in the tests. Every test program runs twice, once as a real Linux executable and once in the interpreter, and the two must agree on output, errors and exit status. When they disagree, one of them has a bug, and finding which has caught quite a few real ones. The file tests go further: the interpreter models the file system, and the test suite compares what each run leaves on disk, down to which files were flushed and in what order.
 
+## One program, every command
+
+Here is one small program taken through every command. The outputs below are copied from real runs on x86-64 Linux, not written by hand.
+
+The program adds up spending by category from a CSV file, and has one test:
+
+```gloss
+record Expense
+  name as text
+  amount as number
+  category as text
+
+table expenses of Expense in "expenses.csv"
+
+feature category_total
+  needs wanted as text
+  set total to 0
+  for each expense in expenses
+    if category of expense is wanted
+      add amount of expense to total
+  give total
+
+feature start
+  load expenses
+  show "Food: ", (category_total with "food")
+
+test "only the wanted category counts"
+  append Expense with name "Lunch", amount 120, category "food" to expenses
+  append Expense with name "Bus", amount 40, category "travel" to expenses
+  expect category_total with "food" is 120
+```
+
+```text
+name,amount,category
+Lunch,120,food
+Bus,40,travel
+Dinner,300.50,food
+```
+
+**Build.** `gloss build` checks the program, prints what it can touch, and writes a static executable. Each file needs an approval; in a terminal the build asks, and `--allow` gives it up front. The approval is kept in `expenses.allow`, so the next build asks nothing.
+
+```text
+$ gloss build expenses.gloss --allow expenses.csv
+This program can:
+  read only          expenses.csv
+  nothing else
+Approval saved in expenses.allow
+Built expenses
+```
+
+**Run.** The executable is the program and nothing else. It also carries its permission list:
+
+```text
+$ ./expenses
+Food: 420.5
+$ ./expenses --permissions
+This program can:
+  read only          expenses.csv
+  nothing else
+```
+
+**Test.** Test blocks live in the program. A test starts with empty tables, so it never touches the real file:
+
+```text
+$ gloss test expenses.gloss
+pass  only the wanted category counts
+
+1 passed, 0 failed
+```
+
+**Format.** There is one accepted way to write each line. Take this program, which works but is written loosely:
+
+```gloss
+feature start
+  set total to 0
+  set prices to list of 120,40,   300.50
+  for each price in prices
+    set total to total+price
+  show "Total: ",total
+```
+
+The build refuses it and names the one right form. `gloss format` rewrites the file into that form:
+
+```text
+$ gloss build messy.gloss
+line 5: set total to total+price. set with + on its own target is written with add. Did you mean add price to total?
+$ gloss format messy.gloss
+Formatted messy.gloss
+```
+
+```gloss
+feature start
+  set total to 0
+  set prices to list of 120, 40, 300.5
+  for each price in prices
+    add price to total
+  show "Total: ", total
+```
+
 ## How it is being built
 
 The way the project is run is half the fun. Gloss is built mostly by AI coding agents, and I steer:
