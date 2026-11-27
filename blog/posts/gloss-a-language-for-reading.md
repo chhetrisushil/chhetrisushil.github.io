@@ -203,6 +203,94 @@ feature start
   show "Total: ", total
 ```
 
+**Trace.** `gloss trace` builds a traced copy, runs it, and narrates each step in plain words, with the program's own output in its place. The same steps go to `expenses.trace` as JSON events.
+
+```text
+$ gloss trace expenses.gloss
+This program can:
+  read only          expenses.csv
+  nothing else
+line 17: loaded expenses from expenses.csv (3 rows)
+line 18: calling category_total with wanted = "food"
+  line 10: total is 0
+  line 11: expense is Expense with name "Lunch", amount 120, category "food"
+  line 12: "food" is "food", so the block runs
+  line 13: total becomes 120
+  line 11: expense is Expense with name "Bus", amount 40, category "travel"
+  line 12: "travel" is "food" is no, so the block is skipped
+  line 11: expense is Expense with name "Dinner", amount 300.5, category "food"
+  line 12: "food" is "food", so the block runs
+  line 13: total becomes 420.5
+line 18: category_total gives 420.5
+Food: 420.5
+```
+
+**Explain.** `gloss explain` prints the real instructions under each source line, with comments naming the variables and the checks. This is the start of `category_total`. The whole output also covers `start` and then every runtime routine the program uses, about 3,700 lines in all:
+
+```text
+$ gloss explain expenses.gloss
+Explain expenses.gloss for x86-64 Linux
+
+feature category_total (line 8)
+  wanted: text, input 1, at [rbp+16]
+  total: number, created on line 10, at [rbp-8]
+  expense: Expense, loop variable on line 11, at [rbp-16]
+…
+line 10: set total to 0
+    movabs rax, 0
+    mov [rbp-8], rax                ; total
+line 11: for each expense in expenses
+    lea rax, [rip+tables]
+    mov rax, [rax+0]
+    mov rax, [rax+0]
+    mov [rbp-24], rax
+    movabs rax, 0
+    mov [rbp-32], rax
+  .L0:
+    mov rax, [rbp-32]
+    mov rcx, [rbp-24]
+    mov rcx, [rcx+0]
+    cmp rax, rcx
+    jge .L2
+    shl rax, 3
+    mov rcx, [rbp-24]
+    mov rcx, [rcx+16]
+    add rax, rcx
+    mov rax, [rax+0]
+    mov [rbp-16], rax               ; expense
+line 12: if category of expense is wanted
+    mov rax, [rbp-16]               ; expense
+    mov rax, [rax+16]
+    push rax
+    mov rax, [rbp+16]               ; wanted
+    push rax
+    call text_equal
+    add rsp, 16
+    movabs rcx, 0
+    cmp rax, rcx
+    je .L4
+line 13: add amount of expense to total
+    mov rax, [rbp-16]               ; expense
+    mov rax, [rax+8]
+    mov rcx, rax
+    mov rax, [rbp-8]                ; total
+    add rax, rcx
+    jo .L5                          ; failure 4: a number went out of range (add amount of expense to total)
+    mov [rbp-8], rax                ; total
+    jmp .L3
+…
+```
+
+**Flowchart.** `gloss flowchart` writes one SVG chart per feature, drawn by the compiler itself. The boxes are the source lines:
+
+```text
+$ gloss flowchart expenses.gloss
+Wrote expenses.category_total.svg
+Wrote expenses.start.svg
+```
+
+![The flowchart gloss draws for category_total: a start box with the feature and its needs line, set total to 0, a for each decision whose next arrow leads to an if decision and the add line, a loop back to the for each, a done arrow to give total, and an end box.](images/expenses.category_total.svg)
+
 ## How it is being built
 
 The way the project is run is half the fun. Gloss is built mostly by AI coding agents, and I steer:
